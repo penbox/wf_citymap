@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171512">
+  <meta name="description" content="艾泽拉斯六大主城立体导览。旋转地图，寻找飞行点、银行、拍卖行与重要 NPC。">
+  <title>雷霆崖 · 艾泽拉斯旅行手册</title>
+  <link rel="icon" href="assets/compass.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/controls/OrbitControls.js":"./vendor/OrbitControls.js"}}</script>
+</head>
+<body>
+  <!-- Visual reference: the user's 14bag app. Warm charcoal, engraved gold,
+       serif headings. Geometry is a traced, simplified city model, not client data. -->
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="艾泽拉斯旅行手册首页"><img src="assets/compass.svg" alt="" width="35" height="35"><span>艾泽拉斯<span class="brand-light">旅行手册</span></span></a>
+    <nav class="city-navigation" aria-label="主城切换">
+      <button type="button" data-city="thunder-bluff" aria-pressed="true">雷霆崖</button>
+      <button type="button" data-city="orgrimmar" aria-pressed="false">奥格瑞玛</button>
+      <button type="button" data-city="undercity" aria-pressed="false">幽暗城</button>
+      <button type="button" data-city="stormwind" aria-pressed="false">暴风城</button>
+      <button type="button" data-city="ironforge" aria-pressed="false">铁炉堡</button>
+      <button type="button" data-city="darnassus" aria-pressed="false">达纳苏斯</button>
+    </nav>
+    <div class="edition">WORLD OF WARCRAFT <span>·</span> 无限</div>
+    <button id="about-open" class="icon-button" aria-label="地图说明与资料来源" title="地图说明与资料来源" data-icon="info"></button>
+  </header>
+  <main class="workspace">
+    <aside class="sidebar" aria-label="查找地点">
+      <div class="city-heading">
+        <p id="city-region" class="eyebrow">KALIMDOR · MULGORE</p>
+        <div class="city-title"><h1 id="city-name">雷霆崖</h1><span id="city-faction" class="faction">部落</span></div>
+        <p id="city-en" class="city-en" lang="en">THUNDER BLUFF</p>
+      </div>
+      <div class="search-box"><span data-icon="search"></span><input id="search" type="search" placeholder="搜索地点、NPC…" aria-label="搜索地点或 NPC" autocomplete="off"><kbd>/</kbd></div>
+      <div class="filters" role="group" aria-label="地点分类"></div>
+      <div class="list-heading"><h2 id="list-title">城中去处</h2><span class="ornament" aria-hidden="true">✦</span></div>
+      <div id="places" class="places" aria-labelledby="list-title"></div>
+      <p id="empty" class="empty" hidden>没有找到这个地点。<br><button id="clear-search" class="text-button">清除筛选</button></p>
+      <div class="sidebar-footer"><span class="little-diamond" aria-hidden="true"></span><span id="city-motto">愿大地母亲指引你的道路。</span></div>
+    </aside>
+    <section class="map-shell" aria-label="雷霆崖地图">
+      <div id="viewport" tabindex="0" aria-label="三维地图，拖动旋转，滚轮缩放，方向键平移">
+        <div id="reference" hidden><img src="assets/reference-map.webp" alt="雷霆崖游戏地图，北面朝上，灵魂高地位于西北，长者高地位于东北，猎人高地位于南侧。"></div>
+        <div id="region-labels" aria-hidden="true"></div>
+        <div id="markers"></div>
+      </div>
+      <div class="map-topbar">
+        <div class="view-switch" role="group" aria-label="地图视角">
+          <button data-view="perspective" aria-pressed="true"><span data-icon="cube"></span>立体</button>
+          <button data-view="top" aria-pressed="false"><span data-icon="layers"></span>俯视</button>
+          <button data-view="reference" aria-pressed="false"><span data-icon="map"></span>原图</button>
+        </div>
+        <button id="toggle-labels" class="icon-button" aria-label="隐藏地点名称" title="显示或隐藏地点名称" aria-pressed="true" data-icon="tag"></button>
+      </div>
+      <div id="level-switch" class="level-switch" role="group" aria-label="幽暗城层级" hidden>
+        <button type="button" data-level="all" aria-pressed="true">全景</button>
+        <button type="button" data-level="surface" aria-pressed="false" title="洛丹伦废墟与电梯上站">地面</button>
+        <button type="button" data-level="upper" aria-pressed="false" title="银行平台、上层环廊与电梯下站">上层</button>
+        <button type="button" data-level="lower" aria-pressed="false" title="下层运河、四个城区与皇家区">下层</button>
+      </div>
+      <div class="map-bottom">
+        <button id="north" class="compass" aria-label="恢复北向视角" title="恢复北向视角"><span class="north-letter">N</span><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26"></circle><circle cx="32" cy="32" r="21"></circle><path class="compass-needle" d="M32 10 38 32 32 54 26 32Z"></path><path class="compass-light" d="M32 10 38 32 32 29Z"></path><path d="M2 32h8m44 0h8M32 2v8m0 44v8"></path></svg></button>
+        <div class="map-controls"><button id="zoom-in" class="icon-button" aria-label="放大地图" title="放大" data-icon="plus"></button><button id="zoom-out" class="icon-button" aria-label="缩小地图" title="缩小" data-icon="minus"></button><span></span><button id="reset-view" class="icon-button" aria-label="查看全城" title="查看全城" data-icon="frame"></button></div>
+      </div>
+      <article id="place-detail" class="place-detail" aria-labelledby="detail-name" hidden>
+        <button id="close-detail" class="icon-button detail-close" aria-label="关闭地点详情" data-icon="close"></button>
+        <div class="detail-heading"><div id="detail-icon" class="place-icon"></div><div><p id="detail-area" class="detail-area"></p><h2 id="detail-name"></h2></div></div>
+        <p id="detail-person" class="detail-person"></p>
+        <p id="detail-description" class="detail-description"></p>
+        <div class="detail-actions"><button id="focus-place" class="gold-button"><span data-icon="focus"></span>定位此处</button><button id="share-place" class="text-button"><span data-icon="link"></span><span id="share-label">分享地点</span></button></div>
+      </article>
+      <div id="render-fallback" class="render-fallback" role="alert" hidden><p>当前浏览器无法显示立体地图。</p><button id="fallback-map" class="gold-button">查看原图</button></div>
+    </section>
+  </main>
+  <dialog id="about"><div class="dialog-heading"><h2>关于这张地图</h2><button id="about-close" class="icon-button" aria-label="关闭地图说明" data-icon="close"></button></div><div class="dialog-body">
+    <p id="city-description">这是一份雷霆崖的轻量立体导览。</p>
+    <p><strong id="city-note">当前地点采用经典旧世参考坐标，尚未在“无限”正式服逐点核验。</strong></p>
+    <h3>地图操作</h3><p>拖动旋转 · 滚轮缩放 · 右键拖动平移。触屏可单指旋转，双指缩放或平移。方向键可平移地图。</p>
+    <h3>资料来源</h3><a id="city-map-source" href="https://warcraftforever.games/maps/thunder-bluff" target="_blank" rel="noreferrer">Warcraft Forever · 游戏地图 ↗</a><a id="city-point-source" href="https://forever-codex.com/map/thunder-bluff/" target="_blank" rel="noreferrer">Forever Codex · 服务地点 ↗</a>
+    <p class="credit">玩家制作，非官方产品。魔兽世界及游戏地图素材版权归 Blizzard Entertainment 所有。</p>
+  </div></dialog>
+  <noscript>请启用 JavaScript 使用交互地图。<a href="assets/reference-map.webp">查看雷霆崖原图</a></noscript>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
